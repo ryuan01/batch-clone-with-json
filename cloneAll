@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# global variables
+student_names=()
+student_git_links=()
+default_link=""
+
+#Parse JSON into arrays
+#learned jq with the help https://starkandwayne.com/blog/bash-for-loop-over-json-array-using-jq/
+parse_names_and_links(){
+  file="$1"
+  if [[ "$file" == "" ]]; then
+    echo "parse_names_and_links must take a json file as input" >&2
+    exit 1
+  fi
+  # get names
+  for row in $(jq -r '.students[].name | @base64' $file); do
+    name=$(echo ${row} | base64 -d -i | sed -e 's/ /_/g' | sed -e 's/\(.*\)/\L\1/')
+    # echo $name
+    student_names+=($name)
+  done
+  # get student_git_links
+  default_link=$(jq -r '.instructor.gitlink' $file)
+  for row in $(jq -r '.students[].gitlink | @base64' $file); do
+    tmp=$default_link
+    link=$(echo ${row} | base64 -d -i)
+    # echo $link
+    new_link=$(sed 's/SleepyInstructor/'$link'/g' <<< $tmp)
+    # echo $new_link
+    student_git_links+=($new_link)
+  done
+  # echo -e "${student_names[@]}"
+  # echo -e "${student_git_links[@]}"
+}
+
+#Clone appropriately
+clone_all(){
+  regularPath=$(echo $default_link | sed -e 's/.*\/\(.*\)\.git/\1/')
+  echo $regularPath
+  # echo "${student_git_links[@]}"
+  for ((i=0;i<${#student_git_links[@]};++i)); do
+    link="${student_git_links[i]}"
+    dir=${student_names[i]}
+    if [ ! -d "$dir" ]; then
+      mkdir $dir
+    fi
+    cd $dir
+    git clone $link
+    cd ..
+    echo "done cloning $link"
+  done
+}
+
+parse_names_and_links $1
+clone_all
