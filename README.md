@@ -2,7 +2,7 @@
 Script to help clone all the forked versions of a git repo, reading from a json file.
 
 ## instructions
-```./cloneAll src``` where src is json file with specific format
+```./mark src``` where src is json file with specific format
 
 e.g.
 ```

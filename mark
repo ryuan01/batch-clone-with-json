@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#TODO: make flags
+#TODO: produce a timestamp log for all git file after pull
+#using code form https://gist.github.com/jasonrudolph/1810768
+#for branch in `git branch -r | grep -v HEAD`;do echo -e `git show --format="%ci %cr" $branch | head -n 1` \\t$branch; done | sort -r
+
 # global variables
 student_names=()
 student_git_links=()
@@ -35,8 +40,6 @@ parse_names_and_links(){
 
 #Clone appropriately
 clone_all(){
-  regularPath=$(echo $default_link | sed -e 's/.*\/\(.*\)\.git/\1/')
-  echo $regularPath
   # echo "${student_git_links[@]}"
   for ((i=0;i<${#student_git_links[@]};++i)); do
     link="${student_git_links[i]}"
@@ -51,5 +54,45 @@ clone_all(){
   done
 }
 
-parse_names_and_links $1
-clone_all
+# update appropriately
+update_all(){
+  regularPath=$(echo $default_link | sed -e 's/.*\/\(.*\)\.git/\1/')
+  echo $regularPath
+  # echo "${student_git_links[@]}"
+  for ((i=0;i<${#student_names[@]};++i)); do
+    dir=${student_names[i]}
+    if [ ! -d "$dir" ]; then
+      mkdir $dir
+    fi
+    if ! cd "$dir/$regularPath"; then
+      echo -e ""$dir/$regularPath" does not exist\n"
+      continue
+    fi
+    # discard all local changes, if any
+    git reset --hard
+    git pull
+    cd ../..
+    echo -e "done updating $dir\n"
+  done
+}
+
+#very specific
+copy_individual(){
+  src="$3/Langara-CPSC1045-006-Assignments/Assignment$1/dist"
+  dst="robin_yuan/Langara-CPSC1045-006-Assignments/Assignment$1/dist"
+  ls $src
+  f="$2"
+  cp $src/$f $dst/$f
+}
+
+
+# clone all
+# parse_names_and_links $1
+# clone_all
+
+# update all
+# parse_names_and_links $1
+# update_all
+
+# copy specific one to another one because the othe one is running server
+copy_individual $1 $2 $3
