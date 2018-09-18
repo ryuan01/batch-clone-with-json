@@ -46,11 +46,13 @@ clone_all(){
     dir=${student_names[i]}
     if [ ! -d "$dir" ]; then
       mkdir $dir
+      cd $dir
+      git clone $link
+      cd ..
+      echo "done cloning $link"
+    else
+      echo "$dir already exist..skipping..."
     fi
-    cd $dir
-    git clone $link
-    cd ..
-    echo "done cloning $link"
   done
 }
 
