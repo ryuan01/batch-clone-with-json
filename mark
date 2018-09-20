@@ -80,7 +80,7 @@ update_all(){
 
 #very specific
 copy_individual(){
-  src="$3/Langara-CPSC1045-006-Assignments/Assignment$1/dist"
+  src="$3Langara-CPSC1045-006-Assignments/Assignment$1/dist"
   dst="robin_yuan/Langara-CPSC1045-006-Assignments/Assignment$1/dist"
   ls $src
   f="$2"
