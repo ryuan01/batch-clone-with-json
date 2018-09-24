@@ -87,6 +87,37 @@ copy_individual(){
   cp $src/$f $dst/$f
 }
 
+print_usage(){
+  echo -e "usage: $0 [-l src] [-u src] [-c assignment# file_name student_folder]
+    \n\t-l: clone all as listed in src(.json)
+    \n\t-u: update all as listed in src(.json)
+    \n\t-c: copy individual assignment to default server "
+}
+
+if [[ "$1" =~ ^((-{1,2})([Cc]$|[Hh][Ee][Ll][Pp])|)$ ]]; then
+  print_usage;
+  exit 1
+else
+  opt="$1"
+  shift;
+  case "$opt" in
+    "-l")
+      parse_names_and_links $1
+      clone_all
+      ;;
+    "-u")
+      parse_names_and_links $1
+      update_all
+      ;;
+    "-c")
+      copy_individual $1 $2 $3
+      ;;
+    *)
+      echo "ERROR: Invalid option: \""$opt"\"" >&2
+      exit 1
+      ;;
+  esac
+fi
 
 # clone all
 # parse_names_and_links $1
