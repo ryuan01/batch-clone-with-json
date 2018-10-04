@@ -1,8 +1,8 @@
 # batch-clone-with-json
-Script to help clone all the forked versions of a git repo, reading from a json file.
+Script to help clone all the forked versions of a git repo, reading from a json file and marking them afterwards.  The mark part has a npm dependency so please ```npm install``` first 
 
 ## instructions
-install ```jq``` on your computer 
+install ```jq``` on your computer
 ```./mark src``` where src is json file with specific format
 
 e.g.

@@ -1,0 +1,19 @@
+{
+  "name": "batch-clone-with-json",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "source": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "jshint": "./node_modules/.bin/jshint",
+    "vnu": "java -Xss512k -jar ./node_modules/vnu-jar/build/dist/vnu.jar"
+  },
+  "author": "",
+  "license": "GPL-3.0",
+  "devDependencies": {},
+  "dependencies": {
+    "jshint": "^2.9.6",
+    "vnu-jar": "^18.8.29"
+  }
+}

@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#WARNING: has a npm dependency
 #TODO: make flags
 #TODO: produce a timestamp log for all git file after pull
 #using code form https://gist.github.com/jasonrudolph/1810768
@@ -103,15 +103,46 @@ copy_individual_js(){
   cp $src/$f $dst/$f
 }
 
-print_usage(){
-  echo -e "usage: $0 [-l src] [-u src] [-c assignment# file_name student_folder]
-    \n\t-l: clone all as listed in src(.json)
-    \n\t-u: update all as listed in src(.json)
-    \n\t-c: copy individual assignment to default server "
+#TODO: file path is very restricted right now, specific to one file structure, and cannot be many, only can be 1 file at a time
+validate(){
+  folder="$1"
+  assignment="$2"
+  f="$3"
+  outFile="results/assignment$assignment/${folder::-1}.txt"
+
+  # make folder structures and output text files
+  if [[ ! -d "results/assignment$assignment" ]]; then
+    mkdir -p results/assignment$assignment
+  fi
+  if [[ ! -f $outFile ]]; then
+    touch $outFile
+    echo "created new file $outFile"
+  fi
+  if [[ "$f" == *.js ]]; then
+    echo "$f ends with .js"
+    fpath=$(find $folder/*/Assignment$assignment/src  -name $f)
+    echo "file is: $fpath"
+    npm run jshint "$fpath" >> $outFile 2>&1
+  elif [[ "$f" == *.html ]]; then
+    echo "$f ends with .html"
+    fpath=$(find $folder/*/Assignment$assignment/dist  -name $f)
+    echo "file is: $fpath"
+    npm run vnu "$fpath" >> $outFile 2>&1
+  else
+    echo "$f has unsupported extension, cannot validate"
+  fi
 }
 
-if [[ "$1" =~ ^((-{1,2})([Aa]$|[Hh][Ee][Ll][Pp])|)$ ]]; then
-  print_usage;
+print_usage(){
+  echo -e "usage: $0\n [-l src] [-u src] [-c assignment# file_name student_folder] [-v folder_name assignment# file_names...]
+    \n\t-l: clone all as listed in src(.json)
+    \n\t-u: update all as listed in src(.json)
+    \n\t-c: copy individual assignment to default server
+    \n\t-v: validate folder and as many file as you want inside this folder  "
+}
+
+if [[ "$#" -lt 1 ]]; then
+  echo "please try '$0 --help' for details"
   exit 1
 else
   opt="$1"
@@ -128,6 +159,26 @@ else
     "-c")
       copy_individual_html $1 $2 $4
       copy_individual_js $1 $3 $4
+      ;;
+    "-v")
+      folder="$1"
+      assignment="$2"
+      shift
+      shift
+      f="$1"
+      while [[ ! -z "$f" ]]; do
+        validate "$folder" "$assignment" "$f"
+        shift
+        f="$1"
+      done
+      # open up the output file or udpate it
+      start chrome "results/assignment$assignment/${folder::-1}.txt"
+
+      # always clean cache because of bunch of errors for syntax problems
+      npm cache clean --force
+      ;;
+    "--help")
+      print_usage
       ;;
     *)
       echo "ERROR: Invalid option: \""$opt"\"" >&2
